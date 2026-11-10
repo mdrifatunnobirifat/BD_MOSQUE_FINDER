@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Bangladesh Mosque, Musafir & Public Facilities Navigator</title>
+
+  <!-- Google Fonts (Beauty Serif + Sans + Bengali Typography) & Leaflet -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600&family=Lora:ital,wght@0,400;0,500;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Amiri:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="theme-dark">
+  <!-- Minimalist Floating Top Header -->
+  <header id="appHeader" class="glass-header">
+    <div class="header-container">
+      <!-- Hamburger Menu Button -->
+      <button id="menuToggleBtn" class="icon-circle-btn" aria-label="Open Navigation Menu">
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+        <span class="hamburger-bar"></span>
+      </button>
+
+      <!-- Brand -->
+      <div class="brand-minimal" id="brandLogo">
+        <span class="brand-icon">🕌</span>
+        <div class="brand-titles">
+          <h1>Mosque BD</h1>
+          <span class="brand-badge">Musafir & Places</span>
+        </div>
+      </div>
+
+      <!-- Center Minimalist Search Bar -->
+      <div class="search-wrap">
+        <form id="searchForm">
+          <span class="search-lens">🔍</span>
+          <input id="searchInput" type="search" placeholder="Search mosques, washrooms, police stations, villages, bazars..." autocomplete="off" />
+          <button type="submit" class="search-submit">Search</button>
+        </form>
+        <div id="searchResults" class="search-dropdown" hidden></div>
+      </div>
+
+      <!-- Quick Action Floating Buttons (Clean: No 'Show New Only') -->
+      <div class="header-quick-actions">
+        <button id="quickWashroomBtn" class="action-chip" title="Find Men & Women Washroom Locations">🚻 Washrooms</button>
+        <button id="quickPoliceBtn" class="action-chip" title="Filter Police Stations & Thanas">🚓 Police</button>
+        <button id="quickMusafirBtn" class="action-chip" title="Check Musafir / Qasr Status">🧳 Musafir</button>
+        <button id="locateBtn" class="action-chip primary" title="Detect GPS Location">📍 My Location</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Slide-out Clean Hamburger Drawer Menu -->
+  <aside id="sideMenuDrawer" class="side-drawer" aria-hidden="true">
+    <div class="drawer-header">
+      <div class="drawer-brand">
+        <span class="brand-icon">🕌</span>
+        <div>
+          <h3>Mosque Navigator BD</h3>
+          <span class="drawer-sub">بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</span>
+        </div>
+      </div>
+      <button id="closeMenuBtn" class="icon-circle-btn close-drawer" aria-label="Close Menu">✕</button>
+    </div>
+
+    <div class="drawer-scroll-body">
+      <!-- Core Islamic Features -->
+      <div class="menu-section">
+        <span class="menu-heading">PRAYER & WORSHIP</span>
+        <button class="menu-item-btn" id="menuMusafir">
+          <span class="item-icon">🧳</span>
+          <div class="item-text">
+            <b>Musafir & Qasr Calculator</b>
+            <span>48-mile (77.25 KM) home boundary & prayer rules</span>
+          </div>
+        </button>
+        <button class="menu-item-btn" id="menuPrayerTimes">
+          <span class="item-icon">🕐</span>
+          <div class="item-text">
+            <b>Daily Prayer Schedule & Countdown</b>
+            <span>Fajr, Dhuhr, Asr, Maghrib, Isha, Jummah & Next Waqt</span>
+          </div>
+        </button>
+        <button class="menu-item-btn" id="menuQibla">
+          <span class="item-icon">🕋</span>
+          <div class="item-text">
+            <b>Qibla Direction (268° W)</b>
+            <span>Interactive real-time compass alignment</span>
+          </div>
+        </button>
+        <button class="menu-item-btn" id="menuTahajjud">
+          <span class="item-icon">🌙</span>
+          <div class="item-text">
+            <b>Tahajjud & Suhoor Calculator</b>
+            <span>Last 1/3rd of night & Sehri / Iftar times</span>
+          </div>
+        </button>
+        <button class="menu-item-btn" id="menuHeritage">
+          <span class="item-icon">🏛️</span>
+          <div class="item-text">
+            <b>Historic Mosques of Bangladesh (73)</b>
+            <span>60-Dome Mosque, Kusumba, Atia, Tara Masjid & more</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- Community & Contribution -->
+      <div class="menu-section">
+        <span class="menu-heading">COMMUNITY & REGISTRY</span>
+        <button class="menu-item-btn" id="menuAddMosque">
+          <span class="item-icon">➕</span>
+          <div class="item-text">
+            <b>Add Missing Village Mosque</b>
+            <span>Zero login required; saved directly to map</span>
+          </div>
+        </button>
+        <button class="menu-item-btn" id="menuVerifiedMosques">
+          <span class="item-icon">⭐</span>
+          <div class="item-text">
+            <b>Community Added Mosques</b>
+            <span>View all locally contributed mosques</span>
+          </div>
+        </button>
+        <button class="menu-item-btn" id="menuEmergency">
+          <span class="item-icon">🚨</span>
+          <div class="item-text">
+            <b>Highway & Emergency Shelters</b>
+            <span>24/7 rest stops with wudu & washroom facilities</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- Explorer & Smart Filters (Updated per user instructions) -->
+      <div class="menu-section">
+        <span class="menu-heading">EXPLORER & SMART FILTERS</span>
+        <button class="menu-item-btn" id="menuFilterWashroom">
+          <span class="item-icon">🚻</span>
+          <div class="item-text">
+            <b>Washroom Locations (Men & Women)</b>
+            <span>Public toilets & wudu spots with gender availability</span>
+          </div>
+        </button>
+        <button class="menu-item-btn" id="menuFilterPolice">
+          <span class="item-icon">🚓</span>
+          <div class="item-text">
+            <b>Police Stations Filter (579 Thanas)</b>
+            <span>All Thanas, Model Thanas & 999 emergency help</span>
+          </div>
+        </button>
+        <button class="menu-item-btn" id="menuBrowseDistricts">
+          <span class="item-icon">🗺️</span>
+          <div class="item-text">
+            <b>Browse 64 Districts & Upazilas</b>
+            <span>Minimal 4-tier regional directory of mosques & places</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- Map Display & Utilities -->
+      <div class="menu-section">
+        <span class="menu-heading">MAP SETTINGS & EXPORT</span>
+        <button class="menu-item-btn" id="menuMosqueDirectory">
+          <span class="item-icon">📋</span>
+          <div class="item-text">
+            <b>Mosque Directory & Free List</b>
+            <span>View, search, and export all 11,552+ mosques table</span>
+          </div>
+        </button>
+        <button class="menu-item-btn" id="menuMeasurement">
+          <span class="item-icon">📏</span>
+          <div class="item-text">
+            <b>Ruler & Distance Measure Tool</b>
+            <span>Measure walking distance between any two spots</span>
+          </div>
+        </button>
+        <button class="menu-item-btn" id="menuOfflineGuide">
+          <span class="item-icon">💾</span>
+          <div class="item-text">
+            <b>Offline Mode & App Cache</b>
+            <span>Save current area offline for rural travels</span>
+          </div>
+        </button>
+        <button class="menu-item-btn" id="menuThemeToggle">
+          <span class="item-icon">🌓</span>
+          <div class="item-text">
+            <b>Dark / Light Satellite View</b>
+            <span>Toggle map contrast mode</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </aside>
+  <div id="drawerBackdrop" class="drawer-overlay" hidden></div>
+
+  <!-- Minimal Floating Prayer Bar (Auto Next Prayer Countdown) -->
+  <div id="prayerCountdownWidget" class="floating-prayer-widget">
+    <div class="widget-inner">
+      <span class="next-label">Next Prayer:</span>
+      <b id="nextPrayerName" class="prayer-highlight">Asr</b>
+      <span class="at-text">at <span id="nextPrayerTime">03:40 PM</span></span>
+      <span class="countdown-pill" id="nextPrayerCountdown">in 2h 15m</span>
+      <button id="expandPrayerBtn" class="pill-arrow" title="View Full Prayer Times">▼</button>
+    </div>
+  </div>
+
+  <!-- Full Prayer Schedule Popup -->
+  <div id="fullPrayerModal" class="minimal-modal" hidden>
+    <div class="modal-box">
+      <div class="modal-top">
+        <h4>🕌 Bangladesh Prayer Times & Qibla</h4>
+        <button id="closePrayerModal" class="mini-close" onclick="document.getElementById('fullPrayerModal').setAttribute('hidden','')">✕</button>
+      </div>
+      <div class="prayer-grid">
+        <div class="p-card"><span>Fajr</span><b>04:56 AM</b></div>
+        <div class="p-card"><span>Sunrise</span><b>06:12 AM</b></div>
+        <div class="p-card"><span>Dhuhr</span><b>11:47 AM</b></div>
+        <div class="p-card"><span>Asr</span><b>03:40 PM</b></div>
+        <div class="p-card"><span>Maghrib</span><b>05:14 PM</b></div>
+        <div class="p-card"><span>Isha</span><b>06:33 PM</b></div>
+        <div class="p-card jummah-card"><span>Friday Jummah</span><b>01:15 PM</b></div>
+        <div class="p-card qibla-card"><span>🕋 Qibla Bearing</span><b>268° W</b></div>
+      </div>
+      <div class="tahajjud-calc-box">
+        <span>🌙 <b>Best Tahajjud Time Tonight:</b> 02:45 AM - 04:30 AM (Last 1/3rd of Night)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map Canvas: Fullscreen Responsive HD Satellite -->
+  <main id="mapViewport">
+    <div id="map"></div>
+    <div id="banner" class="banner" hidden></div>
+
+    <!-- Floating Active Filter Banner (Fixed Clear Button) -->
+    <div id="activeFilterBanner" class="floating-filter-banner" hidden>
+      <span id="activeFilterIcon">🚻</span>
+      <span id="activeFilterText">Active Filter</span>
+      <button type="button" id="clearFilterBtn" class="clear-filter-pill" onclick="window.clearActiveFilter && window.clearActiveFilter()" title="Clear filter">✕ Clear</button>
+    </div>
+
+    <!-- Google Maps-style "Search & Update Mosques in This Area" Floating Pill -->
+    <button id="updateAreaMosquesBtn" class="floating-search-area-btn" hidden>
+      🔄 Update Mosques in This Area
+    </button>
+
+    <!-- Floating Clean Map Overlay Toggles (Responsive Horizontal Bar) -->
+    <div class="floating-layer-chips">
+      <select id="mapTypeSelect" class="clean-select" title="Change Basemap Provider">
+        <option value="googleHybrid">🛰️ Google Satellite + Roads</option>
+        <option value="googleRoadmap">🗺️ Google Street Map</option>
+        <option value="googleSatellite">🛰️ Google Pure Satellite</option>
+        <option value="googleTerrain">🏔️ Google Terrain</option>
+        <option value="esriSatellite">🌍 Esri Satellite</option>
+      </select>
+      <label class="clean-chip"><input type="checkbox" id="toggleRoads" checked /> <span>🛣️ Roads</span></label>
+      <label class="clean-chip"><input type="checkbox" id="toggleBazars" checked /> <span>🛒 Bazars</span></label>
+      <label class="clean-chip"><input type="checkbox" id="toggleVillages" checked /> <span>🏘️ Villages</span></label>
+      <label class="clean-chip"><input type="checkbox" id="toggleWashrooms" checked /> <span>🚻 Washrooms</span></label>
+      <label class="clean-chip"><input type="checkbox" id="togglePolice" checked /> <span>🚓 Police</span></label>
+      <label class="clean-chip"><input type="checkbox" id="toggleBorders" checked /> <span>📐 Borders</span></label>
+      <button id="recenterBdBtn" class="clean-btn">🇧🇩 Full BD</button>
+      <button id="openExplorerBtn" class="clean-btn highlight">🗺️ 4-Tier Explorer</button>
+      <button id="openDirectoryBtn" class="clean-btn">📋 Mosque List</button>
+    </div>
+
+    <!-- Floating Direction & Turn-by-Turn Card -->
+    <div id="directionDrawer" class="clean-floating-card" hidden>
+      <div class="card-header-bar">
+        <div>
+          <span class="type-pill" id="destBadge">Mosque</span>
+          <h3 id="dirTitle" class="beauty-heading">Destination</h3>
+          <div id="dirAddr" class="muted-small"></div>
+        </div>
+        <button type="button" id="closeDrawerBtn" class="card-close" onclick="window.closeDirectionDrawer && window.closeDirectionDrawer()" title="Close">✕</button>
+      </div>
+
+      <!-- Gender / Extra Meta Box (Shown for Washrooms, Police, Heritage) -->
+      <div id="destExtraMeta" class="dest-extra-meta" hidden></div>
+
+      <!-- Integrated Compass -->
+      <div class="compass-compact-row">
+        <div class="compass-bubble">
+          <div id="arrow" class="compass-needle">▲</div>
+        </div>
+        <div class="compass-readings">
+          <div class="bearing-big" id="dirBearing">–</div>
+          <div class="dist-small" id="dirDistance">–</div>
+          <button id="compassBtn" class="gyro-btn">🧭 Live Gyro Compass</button>
+        </div>
+      </div>
+
+      <!-- Travel Modes -->
+      <div class="clean-mode-bar">
+        <label><input type="radio" name="mode" value="foot" checked /> <span>🚶 Walk</span></label>
+        <label><input type="radio" name="mode" value="bike" /> <span>🚲 Bike</span></label>
+        <label><input type="radio" name="mode" value="car" /> <span>🚗 Car</span></label>
+      </div>
+
+      <div id="routeSummary" class="route-summary-box"></div>
+
+      <!-- Mosque Amenities -->
+      <div class="facilities-compact" id="mosqueFacilities">
+        <span class="f-pill">🚰 Wudu</span>
+        <span class="f-pill">🕌 Prayer Space</span>
+        <span class="f-pill" id="fFemaleTag">🚻 Washroom Info</span>
+      </div>
+
+      <!-- Actions -->
+      <div class="card-action-btns">
+        <a id="gmapsLink" class="action-btn gmaps" target="_blank" rel="noopener">Google Maps ↗</a>
+        <button id="shareMosqueBtn" class="action-btn share">📤 Share</button>
+      </div>
+
+      <details class="steps-compact">
+        <summary>Turn-by-turn navigation steps</summary>
+        <ol id="steps"></ol>
+      </details>
+    </div>
+
+    <!-- Clean Musafir Status Card -->
+    <div id="musafirDrawer" class="clean-floating-card musafir-card" hidden>
+      <div class="card-header-bar">
+        <div>
+          <span class="type-pill amber">Traveler Guide</span>
+          <h3>🧳 Musafir (মুসাফির) Status</h3>
+          <div class="muted-small">48-Mile / 77.25 KM Qasr Distance Rule</div>
+        </div>
+        <button type="button" id="closeMusafirBtn" class="card-close" onclick="window.closeMusafirDrawer && window.closeMusafirDrawer()" title="Close">✕</button>
+      </div>
+
+      <div class="home-box-clean">
+        <div class="home-line">
+          <span class="home-icon">🏠</span>
+          <div>
+            <b id="homeTitle">Home: Not Set</b>
+            <div id="homeCoords" class="muted-micro">Set your permanent residence</div>
+          </div>
+        </div>
+        <div class="home-btn-group">
+          <button id="setHomeHereBtn" class="mini-home-btn">📍 Current Spot</button>
+          <button id="pickHomeMapBtn" class="mini-home-btn">✋ Pick on Map</button>
+        </div>
+      </div>
+
+      <!-- Musafir Verdict -->
+      <div id="musafirVerdictCard" class="verdict-banner not-musafir">
+        <div class="verdict-lead">
+          <span id="verdictIcon">🏠</span>
+          <div>
+            <h4 id="verdictTitle">Muqim (মুক্বিম - Resident)</h4>
+            <span id="verdictDistance">0.0 KM from Home</span>
+          </div>
+        </div>
+        <p id="verdictExplanation" class="verdict-subtext">
+          You are within the 77.25 KM limit. Pray full Salah as usual.
+        </p>
+      </div>
+
+      <!-- Qasr Table -->
+      <div class="qasr-table-clean">
+        <table>
+          <thead>
+            <tr><th>Waqt</th><th>Muqim</th><th>Musafir (কসর)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Fajr</td><td>2 Fard</td><td><b>2 Fard</b></td></tr>
+            <tr class="qasr-active"><td>Dhuhr</td><td>4 Fard</td><td><b class="qasr-badge">2 Fard</b> ⚡</td></tr>
+            <tr class="qasr-active"><td>Asr</td><td>4 Fard</td><td><b class="qasr-badge">2 Fard</b> ⚡</td></tr>
+            <tr><td>Maghrib</td><td>3 Fard</td><td><b>3 Fard</b></td></tr>
+            <tr class="qasr-active"><td>Isha</td><td>4 Fard</td><td><b class="qasr-badge">2 Fard</b> ⚡</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Left Explorer Drawer (Minimal 4-Tier Hierarchy + Beauty Typography) -->
+    <aside id="leftAreaDrawer" class="left-drawer" hidden>
+      <div class="drawer-header-small">
+        <div class="hierarchy-title-box">
+          <span class="type-pill" id="areaBadge">4-Tier Explorer</span>
+          <h3 id="areaTitle" class="beauty-heading">Bangladesh Regional Explorer</h3>
+          <div id="hierarchyBreadcrumb" class="hierarchy-breadcrumb">
+            <span class="b-crumb active" id="crumbBd">🇧🇩 All BD</span>
+            <span class="b-sep" hidden id="sep1">›</span>
+            <span class="b-crumb" hidden id="crumbDiv">Division</span>
+            <span class="b-sep" hidden id="sep2">›</span>
+            <span class="b-crumb" hidden id="crumbDist">District</span>
+            <span class="b-sep" hidden id="sep3">›</span>
+            <span class="b-crumb" hidden id="crumbUpz">Upazila/City</span>
+          </div>
+        </div>
+        <button type="button" id="closeLeftDrawerBtn" class="card-close" onclick="window.closeLeftExplorer && window.closeLeftExplorer()" title="Close Explorer">✕</button>
+      </div>
+
+      <!-- Minimal 3-Column Cascade Selectors (Division -> District -> Upazila) -->
+      <div id="hierarchySelectorsBox" class="hierarchy-select-grid">
+        <div class="select-col">
+          <label>Division (বিভাগ)</label>
+          <select id="selectDivision" class="hierarchy-select">
+            <option value="all">All Divisions</option>
+            <option value="Dhaka">Dhaka (ঢাকা)</option>
+            <option value="Chattogram">Chattogram (চট্টগ্রাম)</option>
+            <option value="Rajshahi">Rajshahi (রাজশাহী)</option>
+            <option value="Khulna">Khulna (খুলনা)</option>
+            <option value="Barishal">Barishal (বরিশাল)</option>
+            <option value="Sylhet">Sylhet (সিলেট)</option>
+            <option value="Rangpur">Rangpur (রংপুর)</option>
+            <option value="Mymensingh">Mymensingh (ময়মনসিংহ)</option>
+          </select>
+        </div>
+        <div class="select-col">
+          <label>District (জেলা)</label>
+          <select id="selectDistrict" class="hierarchy-select" disabled>
+            <option value="">All Districts</option>
+          </select>
+        </div>
+        <div class="select-col">
+          <label>Upazila (উপজেলা)</label>
+          <select id="selectUpazila" class="hierarchy-select" disabled>
+            <option value="">All Upazilas</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Washroom Gender Sub-Filter Bar (Shown when viewing Washrooms) -->
+      <div id="washroomGenderFilterBar" class="gender-filter-bar" hidden>
+        <button type="button" class="gender-pill active" data-gender="all">🚻 All (Both)</button>
+        <button type="button" class="gender-pill" data-gender="both">🚹🚺 Men & Women</button>
+        <button type="button" class="gender-pill" data-gender="men">🚹 Men Only</button>
+      </div>
+
+      <!-- Minimal Tabs for Categories -->
+      <div id="hierarchyTabsBox" class="hierarchy-tabs">
+        <button type="button" class="h-tab active" id="tabMosques">🕌 Mosques (<span id="areaMosqueCount">0</span>)</button>
+        <button type="button" class="h-tab" id="tabWashrooms">🚻 Washrooms (<span id="areaWashroomCount">0</span>)</button>
+        <button type="button" class="h-tab" id="tabPolice">🚓 Police (<span id="areaPoliceCount">0</span>)</button>
+        <button type="button" class="h-tab" id="tabVillages">🏘️ Villages (<span id="areaVillageCount">0</span>)</button>
+        <button type="button" class="h-tab" id="tabBazars">🛒 Bazars (<span id="areaBazarCount">0</span>)</button>
+      </div>
+
+      <!-- Lists with Clear Non-Bold Beauty Typography -->
+      <div class="drawer-lists-wrap">
+        <div id="areaMosqueList" class="items-scroll-box"></div>
+        <div id="areaWashroomList" class="items-scroll-box" hidden></div>
+        <div id="areaPoliceList" class="items-scroll-box" hidden></div>
+        <div id="areaVillageList" class="items-scroll-box" hidden></div>
+        <div id="areaBazarList" class="items-scroll-box" hidden></div>
+      </div>
+    </aside>
+
+    <!-- Floating Add Mosque Modal Form -->
+    <div id="addMosqueModal" class="minimal-modal" hidden>
+      <div class="modal-box">
+        <div class="modal-top">
+          <h4>🕌 Add Missing Village Mosque</h4>
+          <button type="button" id="closeModalBtn" class="mini-close">✕</button>
+        </div>
+        <form id="addMosqueForm">
+          <p class="modal-note">Zero login or signup required. Your submission is saved permanently for all travelers.</p>
+          <div class="input-stack">
+            <label>Mosque Name *</label>
+            <input type="text" id="mName" placeholder="e.g. Baitus Salam Jame Masjid" required />
+          </div>
+          <div class="input-row">
+            <div>
+              <label>Village / Area *</label>
+              <input type="text" id="mVillage" placeholder="Village / Road" required />
+            </div>
+            <div>
+              <label>Upazila / District *</label>
+              <input type="text" id="mDistrict" placeholder="District" required />
+            </div>
+          </div>
+          <div class="input-row">
+            <div>
+              <label>Latitude *</label>
+              <input type="number" step="any" id="mLat" placeholder="23.xxxx" required />
+            </div>
+            <div>
+              <label>Longitude *</label>
+              <input type="number" step="any" id="mLon" placeholder="90.xxxx" required />
+            </div>
+          </div>
+          <div class="form-facilities">
+            <label><input type="checkbox" id="mCheckFemale" /> Female Prayer / Washroom</label>
+            <label><input type="checkbox" id="mCheckWudu" checked /> Clean Wudu Area</label>
+          </div>
+          <div class="form-action-row">
+            <button type="button" id="fillGpsBtn" class="btn-outline">📍 Auto GPS</button>
+            <button type="button" id="pickSpotBtn" class="btn-outline">✋ Pin on Map</button>
+            <button type="submit" class="btn-submit">✅ Publish Mosque</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- National Mosque Directory & Free Exportable List Modal -->
+    <div id="mosqueDirectoryModal" class="minimal-modal directory-modal" hidden>
+      <div class="modal-box directory-box">
+        <div class="modal-top">
+          <div>
+            <h4>📋 Bangladesh Mosque Directory & Locations Table</h4>
+            <span class="muted-small">11,552+ Mosques across all 64 Districts & 485 Upazilas · 100% Free</span>
+          </div>
+          <div class="modal-top-actions">
+            <button id="exportCsvBtn" class="export-btn" title="Export as CSV/Excel">📥 Export CSV</button>
+            <button id="exportJsonBtn" class="export-btn" title="Export as JSON">📥 Export JSON</button>
+            <button type="button" id="closeDirectoryModal" class="mini-close">✕</button>
+          </div>
+        </div>
+
+        <div class="directory-filter-bar">
+          <input type="text" id="directorySearchInput" class="dir-search-input" placeholder="🔍 Search by mosque name, village, upazila, or district..." />
+          <select id="directoryDivSelect" class="dir-select">
+            <option value="all">All Divisions (সব বিভাগ)</option>
+            <option value="Dhaka">Dhaka</option>
+            <option value="Chattogram">Chattogram</option>
+            <option value="Rajshahi">Rajshahi</option>
+            <option value="Khulna">Khulna</option>
+            <option value="Barishal">Barishal</option>
+            <option value="Sylhet">Sylhet</option>
+            <option value="Rangpur">Rangpur</option>
+            <option value="Mymensingh">Mymensingh</option>
+          </select>
+        </div>
+
+        <div class="directory-table-wrap">
+          <table class="directory-table">
+            <thead>
+              <tr>
+                <th style="width: 45px;">#</th>
+                <th>Name of Mosque (মসজিদের নাম)</th>
+                <th>Longitude (দ্রাঘিমাংশ)</th>
+                <th>Latitude (অক্ষাংশ)</th>
+                <th style="text-align: right; width: 200px;">Google Map & Route</th>
+              </tr>
+            </thead>
+            <tbody id="directoryTableBody">
+              <!-- Populated by JavaScript -->
+            </tbody>
+          </table>
+        </div>
+        <div class="directory-footer">
+          <span id="directoryCountText">Showing 150 of 11,552 mosques</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="bd_hierarchy.js"></script>
+  <script src="districts.geojson.js"></script>
+  <script src="villages.js"></script>
+  <script src="mosques.js"></script>
+  <script src="facilities_data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
